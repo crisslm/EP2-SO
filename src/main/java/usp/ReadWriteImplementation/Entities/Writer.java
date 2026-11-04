@@ -18,9 +18,11 @@ public class Writer extends Thread{
     public void run(){
         Random rand = new Random();
         int position;
+        boolean accessAcquired = false;
 
         try{
             readWriteController.startWrite();
+            accessAcquired = true;
             for(int i=0;i<100;i++){
                 position = rand.nextInt(lines.size());
                 lines.set(position, "MODIFICADO");
@@ -29,7 +31,9 @@ public class Writer extends Thread{
         } catch(InterruptedException e){
             Thread.currentThread().interrupt();
         } finally{
-            readWriteController.endWrite();
+            if (accessAcquired) {
+                readWriteController.endWrite();
+            }
         }
     }
 }

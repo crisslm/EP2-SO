@@ -18,8 +18,10 @@ public class Reader extends Thread{
     public void run(){
         Random rand = new Random();
         int position;
+        boolean accessAcquired = false;
         try{
             readWriteController.startRead();
+            accessAcquired = true;
             for(int i=0;i<100;i++){
                 position = rand.nextInt(lines.size());
                 String local = lines.get(position);
@@ -28,12 +30,9 @@ public class Reader extends Thread{
         } catch(InterruptedException e){
             Thread.currentThread().interrupt();
         } finally {
-            readWriteController.endRead();
-        }
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            if (accessAcquired) {
+                readWriteController.endRead();
+            }
         }
     }
 }

@@ -18,13 +18,13 @@ public class Reader2 extends Thread {
         Random rand = new Random();
         int position;
         try {
-            for (int i = 0; i < 100; i++) {
-                position = rand.nextInt(lines.size());
-                synchronized (lock) {
+            synchronized (lock) {
+                for (int i = 0; i < 100; i++) {
+                    position = rand.nextInt(lines.size());
                     String local = lines.get(position);
                 }
+                sleep(1);
             }
-            sleep(1);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

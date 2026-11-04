@@ -45,12 +45,19 @@ public class ThreadsManager {
         for(Thread thread : threads){
             thread.start();
         }
+        boolean interrupted = false;
         for(Thread thread : threads){
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            while (true) {
+                try {
+                    thread.join();
+                    break;
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
             }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 }
