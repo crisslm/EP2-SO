@@ -5,8 +5,11 @@ import usp.ReadWriteImplementation.Entities.Writer;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ThreadsManager {
+    private final AtomicReference<Throwable> workerFailure = new AtomicReference<>();
+
     Thread [] threads;
     ArrayList<String> lines;
     ReadWriteController readWriteController;
@@ -39,6 +42,12 @@ public class ThreadsManager {
                 aux2--;
             }
         }
+        // Configuração fora do intervalo medido, antes de iniciar os workers.
+        for (Thread thread : threads) {
+            thread.setUncaughtExceptionHandler((worker, error) -> {
+                workerFailure.compareAndSet(null, error);
+            });
+        }
     }
 
     public void start(){
@@ -56,8 +65,23 @@ public class ThreadsManager {
                 }
             }
         }
+        // join() pode retornar sem lançar se a thread já terminou.
+        interrupted = interrupted || Thread.currentThread().isInterrupted();
         if (interrupted) {
             Thread.currentThread().interrupt();
+        }
+
+        Throwable failure = workerFailure.get();
+        if (failure != null) {
+            throw new IllegalStateException(
+                "Rodada inválida: uma das threads falhou", failure
+            );
+        }
+
+        if (interrupted) {
+            throw new IllegalStateException(
+                "Experimento interrompido enquanto aguardava as threads"
+            );
         }
     }
 }

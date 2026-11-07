@@ -26,7 +26,10 @@ public class Reader2 extends Thread {
                 sleep(1);
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(
+                "Worker interrompido; a rodada não pode ser contabilizada", e
+            );
         }
     }
 }

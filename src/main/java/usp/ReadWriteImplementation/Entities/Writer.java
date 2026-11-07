@@ -30,6 +30,9 @@ public class Writer extends Thread{
             sleep(1);
         } catch(InterruptedException e){
             Thread.currentThread().interrupt();
+            throw new IllegalStateException(
+                "Worker interrompido; a rodada não pode ser contabilizada", e
+            );
         } finally{
             if (accessAcquired) {
                 readWriteController.endWrite();
